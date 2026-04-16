@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  data-service:
+    build: ./data-service
+    container_name: data-service
+    ports:
+      - "8002:8002"
+    volumes:
+      - data-volume:/data
+
+  workflow-service:
+    build: ./workflow-service
+    container_name: workflow-service
+    ports:
+      - "8001:8001"
+    environment:
+      DATA_SERVICE_URL: http://data-service:8002
+      AWS_REGION: ap-southeast-1
+      SUBMISSION_EVENT_FUNCTION: campus-buzz-submission-event
+    depends_on:
+      - data-service
+
+  presentation-service:
+    build: ./presentation-service
+    container_name: presentation-service
+    ports:
+      - "8000:8000"
+    environment:
+      WORKFLOW_SERVICE_URL: http://workflow-service:8001
+      DATA_SERVICE_URL: http://data-service:8002
+    depends_on:
+      - workflow-service
+      - data-service
+
+volumes:
+  data-volume:
