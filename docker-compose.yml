@@ -16,7 +16,7 @@ services:
       - "8001:8001"
     environment:
       DATA_SERVICE_URL: http://data-service:8002
-      AWS_REGION: ap-southeast-1
+      AWS_REGION: ap-southeast-2
       SUBMISSION_EVENT_FUNCTION: campus-buzz-submission-event
     depends_on:
       - data-service
