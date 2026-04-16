@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submission Result - Campus Buzz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: white;
+        }
+        .APPROVED { background: #e8f8ec; }
+        .NEEDS_REVISION { background: #fff7dd; }
+        .INCOMPLETE { background: #fdeaea; }
+        .PENDING { background: #f3f3f3; }
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 90px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #status-badge {
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Submission Result</h1>
+    <p>Submission ID: <span id="sid">{{ submission_id }}</span></p>
+
+    <div id="card" class="card PENDING">
+        <p><span class="label">Status:</span> <span id="status">PENDING</span></p>
+        <p><span class="label">Category:</span> <span id="category">-</span></p>
+        <p><span class="label">Priority:</span> <span id="priority">-</span></p>
+        <p><span class="label">Note:</span> <span id="note">Processing started...</span></p>
+    </div>
+
+    <p><a href="/">← Submit another event</a></p>
+
+    <script>
+        const submissionId = "{{ submission_id }}";
+
+        async function fetchResult() {
+            try {
+                const res = await fetch(`/api/submission/${submissionId}`);
+                const data = await res.json();
+
+                if (!data.status) return;
+
+                document.getElementById("status").textContent = data.status;
+                document.getElementById("category").textContent = data.category || "-";
+                document.getElementById("priority").textContent = data.priority || "-";
+                document.getElementById("note").textContent = data.note || "-";
+
+                const card = document.getElementById("card");
+                card.className = "card " + data.status;
+
+                // Keep polling if still PENDING
+                if (data.status === "PENDING") {
+                    setTimeout(fetchResult, 1500);
+                }
+            } catch (err) {
+                console.error("Failed to fetch result:", err);
+                setTimeout(fetchResult, 2000); // retry on error
+            }
+        }
+
+        fetchResult();
+    </script>
+</body>
+</html>

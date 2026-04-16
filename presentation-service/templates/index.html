@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Buzz - Submit Event</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            margin-top: 18px;
+            padding: 10px 18px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .note {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        #message {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Campus Buzz</h1>
+    <p>Submit a campus event for review.</p>
+
+    <form id="eventForm">
+        <label>Title *</label>
+        <input name="title" type="text" required>
+
+        <label>Description *</label>
+        <textarea name="description" rows="5" required></textarea>
+        <div class="note">Minimum 40 characters for approval.</div>
+
+        <label>Location *</label>
+        <input name="location" type="text" required>
+
+        <label>Date (YYYY-MM-DD) *</label>
+        <input name="date" type="text" placeholder="2026-04-20" required>
+
+        <label>Organizer *</label>
+        <input name="organizer" type="text" required>
+
+        <button type="submit">Submit Event</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        const form = document.getElementById("eventForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await fetch("/api/submit", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.submission_id) {
+                    window.location.href = `/result/${data.submission_id}`;
+                } else {
+                    message.innerHTML = `<p style="color:red;">Submission failed: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (err) {
+                message.innerHTML = `<p style="color:red;">Network error. Please try again.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
